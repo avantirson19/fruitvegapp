@@ -5,8 +5,22 @@ from PIL import Image
 import numpy as np
 import json
 import os
+import urllib.request
 
 BASE_DIR = os.path.dirname(__file__)
+HF_MODEL_URL = "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels.keras"
+
+
+def _ensure_model_file(local_path: str, download_url: str):
+    if os.path.exists(local_path):
+        return
+    try:
+        with st.spinner("Downloading model file..."):
+            urllib.request.urlretrieve(download_url, local_path)
+    except Exception as e:
+        raise RuntimeError(f"Failed to download model from {download_url}: {e}")
+
+
 MODEL_CANDIDATES = [
     {
         "name": "optimized_plain",
@@ -27,6 +41,8 @@ loaded_models = []
 load_errors = []
 for candidate in MODEL_CANDIDATES:
     try:
+        if candidate["name"] == "optimized_plain":
+            _ensure_model_file(candidate["path"], HF_MODEL_URL)
         loaded_model = load_model(
             candidate["path"],
             compile=False,
