@@ -8,7 +8,10 @@ import os
 import urllib.request
 
 BASE_DIR = os.path.dirname(__file__)
-HF_MODEL_URL = "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels.keras"
+HF_MODEL_URL = os.getenv(
+    "HF_MODEL_URL",
+    "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels.keras",
+)
 
 
 def _ensure_model_file(local_path: str, download_url: str):
@@ -27,12 +30,16 @@ MODEL_CANDIDATES = [
         "path": os.path.join(BASE_DIR, "fruitvegappoptimizedmodels.keras"),
         "input_mode": "inception_external",
         "custom_objects": None,
+        "download_url": HF_MODEL_URL,
+        "required": True,
     },
     {
         "name": "optimized_with_lambda",
         "path": os.path.join(BASE_DIR, "fruitvegapp__optimizedmodels.keras"),
         "input_mode": "raw_0_255",
         "custom_objects": {"preprocess_input": preprocess_input},
+        "download_url": None,
+        "required": False,
     },
 ]
 LOW_CONFIDENCE_THRESHOLD = 18.0
@@ -41,8 +48,10 @@ loaded_models = []
 load_errors = []
 for candidate in MODEL_CANDIDATES:
     try:
-        if candidate["name"] == "optimized_plain":
-            _ensure_model_file(candidate["path"], HF_MODEL_URL)
+        if candidate["download_url"]:
+            _ensure_model_file(candidate["path"], candidate["download_url"])
+        elif not os.path.exists(candidate["path"]) and not candidate["required"]:
+            continue
         loaded_model = load_model(
             candidate["path"],
             compile=False,
@@ -62,6 +71,10 @@ if not loaded_models:
     st.error("Failed to load any model.")
     for err in load_errors:
         st.error(err)
+
+
+def get_model_status():
+    return {"loaded_count": len(loaded_models), "errors": load_errors}
 
 DEFAULT_CLASS_NAMES = [
     'apple', 'banana', 'beetroot', 'bell pepper', 'cabbage', 'capsicum',
@@ -145,7 +158,8 @@ def _predict_model_with_tta(model_entry, views):
 
 def predict_image(image: Image.Image):
     if not loaded_models:
-        raise RuntimeError("Model not loaded. Check path and file.")
+        detail = "; ".join(load_errors) if load_errors else "unknown load failure"
+        raise RuntimeError(f"Model not loaded. Details: {detail}")
 
     for model_entry in loaded_models:
         if model_entry["model"].output_shape[-1] != len(class_names):

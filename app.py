@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image
-from predict import predict_image
+from predict import predict_image, get_model_status
 
 st.set_page_config(page_title="Smart Fruit Quality System", layout="centered")
 
@@ -96,8 +96,17 @@ with st.expander("Tips to increase confidence", expanded=False):
 if image is not None:
 
     st.image(image, caption="Input Image", width="stretch")
-
-    predicted_class, confidence, is_low_confidence, preprocessing_mode, model_name = predict_image(image)
+    try:
+        predicted_class, confidence, is_low_confidence, preprocessing_mode, model_name = predict_image(image)
+    except Exception as e:
+        status = get_model_status()
+        st.error("Prediction failed because model could not be loaded.")
+        st.error(str(e))
+        if status["errors"]:
+            st.caption("Load errors:")
+            for err in status["errors"]:
+                st.write(f"- {err}")
+        st.stop()
 
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     st.markdown("<div class='section-title'>Prediction Result</div>", unsafe_allow_html=True)
