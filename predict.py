@@ -1,21 +1,22 @@
 import streamlit as st
 from tensorflow.keras.models import load_model
+from tensorflow.keras.applications.inception_v3 import preprocess_input
 from PIL import Image
 import numpy as np
-from keras.applications.inception_v3 import preprocess_input
 import json
 import os
 
+BASE_DIR = os.path.dirname(__file__)
 MODEL_CANDIDATES = [
     {
         "name": "optimized_plain",
-        "path": r"D:\PROJECT\fruitvegapp_\fruitvegappoptimizedmodels.keras",
+        "path": os.path.join(BASE_DIR, "fruitvegappoptimizedmodels.keras"),
         "input_mode": "inception_external",
         "custom_objects": None,
     },
     {
         "name": "optimized_with_lambda",
-        "path": r"D:\PROJECT\fruitvegapp_\fruitvegapp__optimizedmodels.keras",
+        "path": os.path.join(BASE_DIR, "fruitvegapp__optimizedmodels.keras"),
         "input_mode": "raw_0_255",
         "custom_objects": {"preprocess_input": preprocess_input},
     },
