@@ -24,6 +24,20 @@ def _ensure_model_file(local_path: str, download_url: str):
         raise RuntimeError(f"Failed to download model from {download_url}: {e}")
 
 
+def _load_model_compat(path, custom_objects=None):
+    # Try permissive load mode first for cross-version compatibility on cloud.
+    try:
+        return load_model(
+            path,
+            compile=False,
+            custom_objects=custom_objects,
+            safe_mode=False,
+        )
+    except TypeError:
+        # Older loaders may not support safe_mode.
+        return load_model(path, compile=False, custom_objects=custom_objects)
+
+
 MODEL_CANDIDATES = [
     {
         "name": "optimized_plain",
@@ -52,10 +66,8 @@ for candidate in MODEL_CANDIDATES:
             _ensure_model_file(candidate["path"], candidate["download_url"])
         elif not os.path.exists(candidate["path"]) and not candidate["required"]:
             continue
-        loaded_model = load_model(
-            candidate["path"],
-            compile=False,
-            custom_objects=candidate["custom_objects"],
+        loaded_model = _load_model_compat(
+            candidate["path"], custom_objects=candidate["custom_objects"]
         )
         loaded_models.append(
             {
