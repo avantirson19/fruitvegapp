@@ -2,9 +2,9 @@ import numpy as np
 import streamlit as st
 from PIL import Image
 
-from predict import get_model_status, predict_image
-
 st.set_page_config(page_title="Smart Fruit Quality System", layout="wide")
+
+from predict import get_model_status, predict_image
 
 
 def _sanitize_boxes(boxes, width, height, min_area_ratio=0.008):

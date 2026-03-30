@@ -20,8 +20,7 @@ def _ensure_model_file(local_path: str, download_url: str):
     if os.path.exists(local_path) and not FORCE_MODEL_REFRESH:
         return
     try:
-        with st.spinner("Downloading model file..."):
-            urllib.request.urlretrieve(download_url, local_path)
+        urllib.request.urlretrieve(download_url, local_path)
     except Exception as e:
         raise RuntimeError(f"Failed to download model from {download_url}: {e}")
 
