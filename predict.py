@@ -11,7 +11,7 @@ import urllib.request
 BASE_DIR = os.path.dirname(__file__)
 HF_MODEL_URL = os.getenv(
     "HF_MODEL_URL",
-    "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels.keras",
+    "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels_resaved.keras",
 )
 FORCE_MODEL_REFRESH = os.getenv("FORCE_MODEL_REFRESH", "1") == "1"
 
@@ -52,7 +52,7 @@ def _load_model_compat(path, custom_objects=None):
 MODEL_CANDIDATES = [
     {
         "name": "optimized_plain",
-        "path": os.path.join(BASE_DIR, "fruitvegappoptimizedmodels.keras"),
+        "path": os.path.join(BASE_DIR, "fruitvegappoptimizedmodels_resaved.keras"),
         "input_mode": "inception_external",
         "custom_objects": None,
         "download_url": HF_MODEL_URL,
