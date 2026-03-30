@@ -13,10 +13,11 @@ HF_MODEL_URL = os.getenv(
     "HF_MODEL_URL",
     "https://huggingface.co/avantison19/fruitvegmodel/resolve/main/fruitvegappoptimizedmodels.keras",
 )
+FORCE_MODEL_REFRESH = os.getenv("FORCE_MODEL_REFRESH", "1") == "1"
 
 
 def _ensure_model_file(local_path: str, download_url: str):
-    if os.path.exists(local_path):
+    if os.path.exists(local_path) and not FORCE_MODEL_REFRESH:
         return
     try:
         with st.spinner("Downloading model file..."):
@@ -41,10 +42,10 @@ def _load_model_compat(path, custom_objects=None):
         message = str(e)
         if "expects 1 input(s), but it received 2 input tensors" in message:
             raise RuntimeError(
-                "This model file is not compatible with the installed TensorFlow/Keras "
-                f"version ({tf.__version__}). Reinstall the app dependencies from "
-                "requirements.txt or requirements.deploy.txt so the runtime uses "
-                "tensorflow-cpu==2.16.1."
+                "This saved model still cannot be deserialized under the deployed "
+                f"TensorFlow/Keras runtime ({tf.__version__}). The dependency install is "
+                "now correct; the next fix is to re-export the model from the original "
+                "training environment or provide a cloud-compatible model file."
             ) from e
         raise
 
