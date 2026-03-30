@@ -1,4 +1,5 @@
 import streamlit as st
+import tensorflow as tf
 from tensorflow.keras.models import load_model
 from tensorflow.keras.applications.inception_v3 import preprocess_input
 from PIL import Image
@@ -36,6 +37,16 @@ def _load_model_compat(path, custom_objects=None):
     except TypeError:
         # Older loaders may not support safe_mode.
         return load_model(path, compile=False, custom_objects=custom_objects)
+    except Exception as e:
+        message = str(e)
+        if "expects 1 input(s), but it received 2 input tensors" in message:
+            raise RuntimeError(
+                "This model file is not compatible with the installed TensorFlow/Keras "
+                f"version ({tf.__version__}). Reinstall the app dependencies from "
+                "requirements.txt or requirements.deploy.txt so the runtime uses "
+                "tensorflow-cpu==2.16.1."
+            ) from e
+        raise
 
 
 MODEL_CANDIDATES = [

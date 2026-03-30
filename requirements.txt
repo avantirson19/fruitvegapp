@@ -1,5 +1,6 @@
-streamlit
-tensorflow-cpu==2.20.0
-numpy
-pillow
-h5py
+streamlit==1.39.0
+tensorflow-cpu==2.16.1
+numpy==1.26.4
+pillow==10.4.0
+h5py==3.11.0
+ultralytics
