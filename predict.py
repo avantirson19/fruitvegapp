@@ -90,11 +90,6 @@ for candidate in MODEL_CANDIDATES:
     except Exception as e:
         load_errors.append(f"{candidate['name']}: {e}")
 
-if not loaded_models:
-    st.error("Failed to load any model.")
-    for err in load_errors:
-        st.error(err)
-
 
 def get_model_status():
     return {"loaded_count": len(loaded_models), "errors": load_errors}
